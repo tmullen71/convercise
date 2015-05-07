@@ -1,0 +1,22 @@
+<style>
+div#v-streams {display: inline-block}
+img.puzzle_img {float:left; width: 400px}
+div.twentyTwentyContainer{float:left; width: 400px}
+div.vstream {width: 150px; height: 100px; border: 2px solid}
+</style>
+
+
+<div class="panel panel-default" ng-cloak>
+  <div class="panel-heading">
+    <h3 class="panel-title">Do this puzzle in {{tasks[ct_task].langs}}</h3>
+  </div>
+
+  <div class="panel-body">
+    <ng-if="tasks[ct_task].state == 1">
+
+    {{taskpath}}/{{tasks[ct_task].ind}}/{{tasks[ct_task].sktch}}
+
+    <canvas loc-inst-processing="sketch" ng-click="move($sketch)"></canvas>
+    <div>
+  <div>
+<div>

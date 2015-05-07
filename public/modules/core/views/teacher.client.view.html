@@ -1,0 +1,111 @@
+<section data-ng-controller="ClassroomController">
+
+	<h4>Your classroom</h4>
+
+<accordion class="requests" ng-if="classroom.requests.length > 0">
+<accordion-group>
+ <accordion-heading>
+	<button class="btn-acceptReq btn btn-success btn-xs">Accept all</button>
+	<div class="reqHead">
+		<span>New class join requests </span><span class="badge">{{classroom.requests.length}}</span>
+	</div>
+</accordion-heading>
+
+<table class="table-reqs table table-striped table-bordered">
+<tr ng-repeat="req in classroom.requests">
+	<td>
+		{{req.displayName}}
+	</td>
+	<td>
+		{{req.email}}
+	</td>
+	<td>
+		<div class="btn-group btn-group-xs">
+			<button class="btn btn-success">Accept</button>
+			<button class="btn btn-danger">Reject</button>
+		</div>
+	</td>
+</tr>
+</table>
+</accordion-group>
+</accordion>
+
+<div class="classroom">
+
+<div class="classBtns">
+	<div class="addStudent">
+		<input type="email" class="form-control addStudentEmail"
+		placeholder="Enter email of student to add">
+		<button class="btn btn-primary btn-small">
+			Add student
+		</button>
+	</div>
+	<button class="btn btn-primary btn-small">
+		Email student(s)
+	</button>
+	<button class="btn btn-primary btn-small">
+		Remove student(s)
+	</button>
+	<button class="btn btn-primary btn-small">
+		Export to file
+	</button>
+</div>
+
+<table class="table-classroom table table-striped table-bordered">
+<tr>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td>
+		Name
+	</td>
+	<td>
+		Email
+	</td>
+	<td>
+		Section
+	</td>
+	<td>
+		Completed
+	</td>
+	<td>
+		Time Spent
+	</td>
+	<td>
+		L1:L2
+	</td>
+	<td>
+		Alerts
+	</td>
+<tr>
+<tbody ng-repeat="section in classroom.sections">
+
+<tr ng-repeat="student in section.members">
+	<td ng-if="$index == 0" rowspan={{section.members.length}}>{{section.name}}</td>
+	<td><input type="checkbox"></td>
+	<td>{{student.displayName}}</td>
+	<td>{{student.email}}</td>
+	<td>
+
+		<div class="btn-group" dropdown>
+			<button type="button" class="btn btn-primary btn-xs dropdown-toggle" dropdown-toggle>
+				A <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li>B</li>
+				<li>C</li>
+			</ul>
+		</div>
+
+	</td>
+	<td>{{student.completed}}5 exchanges</td>
+	<td>{{student.timespent}}37 mins</td>
+	<td>{{student.l1_l2}}6:4</td>
+	<td>{{student.alerts}}<span class="label label-success">No</span></td>
+</tr>
+
+</tbody>
+</table>
+
+</section>

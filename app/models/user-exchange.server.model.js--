@@ -1,0 +1,20 @@
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+var mongoose = require('mongoose'),
+	Schema = mongoose.Schema;
+
+/**
+ * UserExchange Schema
+ */
+var UserExchangeSchema = new Schema({
+	user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+	exchanges: {type: mongoose.Schema.Types.ObjectId, ref: 'Exchange'}
+});
+
+UserExchangeSchema.index({ user: 1 });
+
+//ExchangeSchema.set('autoIndex', (app.get('env') === 'development'));
+mongoose.model('UserExchange', UserExchangeSchema);

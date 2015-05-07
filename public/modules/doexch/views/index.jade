@@ -1,0 +1,58 @@
+extends ../../layouts/exchange
+
+block head
+  title About Us
+
+block neck
+  link(rel='stylesheet', href='/vendor/twentytwenty-master/css/foundation.css')
+  link(rel='stylesheet', href='/vendor/twentytwenty-master/css/twentytwenty.css')
+  link(rel='stylesheet', href='/views/exchange/index.min.css?#{cacheBreaker}')
+  link(rel='stylesheet', href='/layouts/style.css')
+
+
+block feet
+  //script(src='/views/exchange/index.min.js?#{cacheBreaker}')
+  script(src='/vendor/twentytwenty-master/js/jquery.event.move.js')
+  script(src='/vendor/twentytwenty-master/js/jquery.twentytwenty.js')
+  script(src='/socket.io/socket.io.js')
+  script(src='/views/exchange/index.js?#{cacheBreaker}')
+
+
+block body
+  div.row
+    div.col-sm-6
+      div.page-header
+        h2 Do this puzzle in
+
+      span#instructions Here are the instructions for how to do this puzzle.
+                        |They are different for each person but should be no longer than this.
+
+      div.puzzle_container
+        div.exchange_task_puzzle
+          div.twentytwenty-container.comp
+            img#this_comp_img.puzz_imgs
+            img#that_comp_img.puzz_imgs
+          div.main_img
+            img#puzzle_img.puzz_imgs
+          canvas#puzzle_canvas
+    div.col-sm-6.special
+      div.page-header
+      p#message Here's a message
+      div
+        div#chatBox.well.native
+        div#exchange
+    //div.col-sm-6.videos
+      div.page-header
+        h1 Videos
+  script(type='text/template', id='tmpl-exch')
+    form
+      div.form-group
+        div.input-group
+          input.learner.form-control(type='text', class='answerInput', name='answerInput', placeholder='enter a message')
+          span.input-group-btn
+            button.btn.btn-primary.btn-approve.native Approve the answer
+            button.btn.btn-primary.btn-reapprove.native Approve the final answer
+          div
+            button.btn.btn-warning.btn-failure No
+            | &nbsp;
+            button.btn.btn-primary.btn-success Yes

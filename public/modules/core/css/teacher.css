@@ -1,0 +1,34 @@
+.requests > .panel-group{
+  margin-bottom:10px;
+}
+
+.table-reqs{
+  margin-bottom: 0;
+}
+
+.table-classroom{
+  margin-top:10px;
+}
+.addStudentEmail{
+  max-width: 220px;
+  display:inline;
+}
+
+.classBtns{
+  display:inline;
+}
+
+.reqHead{
+  display:inline;
+}
+
+.btn-acceptReq{
+  float:right;
+}
+
+.addStudent{
+  width: 340px;
+  display: inline-block;
+  border: 1px solid gray;
+  padding: 5px;
+}

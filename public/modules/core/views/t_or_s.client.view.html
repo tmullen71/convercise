@@ -1,0 +1,8 @@
+<div data-ng-controller="HeaderController"/>
+<div data-ng-if="authentication.user.roles[0] == 'user'"
+	data-ng-include="'/modules/core/views/home.client.view.html'">
+</div>
+<div data-ng-if="authentication.user.roles[0] == 'teacher'"
+	data-ng-include="'/modules/core/views/teacher.client.view.html'">
+</div>
+</div>

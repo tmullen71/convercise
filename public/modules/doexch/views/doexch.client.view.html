@@ -1,0 +1,16 @@
+<section data-ng-controller="DoExchController">
+
+  <!-- Find the difference image task -->
+  <div data-ng-show="doneTasks[ct_task].state < 5 && doneTasks[ct_task].task.type == 'ftd-img'" data-ng-include="'/modules/doexch/views/partials/ftd-img.html'">
+  </div>
+
+
+  <!-- Location instructions task -->
+  <div data-ng-show="doneTasks[ct_task].state < 5 && doneTasks[ct_task].task.type == 'loc-inst'" data-ng-include="'/modules/doexch/views/partials/loc-inst.html'">
+  </div>
+
+  <!-- Debrief -->
+  <div data-ng-show="doneTasks[ct_task].state === 5" data-ng-include="'/modules/doexch/views/partials/debrief.html'">
+  </div>
+
+</section>

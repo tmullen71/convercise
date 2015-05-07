@@ -1,0 +1,98 @@
+<section data-ng-controller="HomeController">
+	<div class="jumbotron text-center">
+		<div data-ng-hide="authentication.user" class="row">
+			<div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-12">
+				<img alt="Convercise" src="modules/core/img/brand/yinyang60.png" />
+			</div>
+		</div>
+		<br>
+		<div data-ng-hide="authentication.user" class="row">
+			<p class="lead">
+				Get started!
+			</p>
+		</div>
+		<div id="topPageBtns" data-ng-show="authentication.user">
+			<div class="row btnsRow">
+				<p class="topPageBtnsContainer">
+					<a class="top-btn btn btn-primary btn-lg" ng-click="startExch()" target="_blank">Start exchange</a>
+					<a class="top-btn btn btn-primary btn-lg" href="#/schedule" target="_blank">Set schedule</a>
+				</p>
+			</div>
+		</div>
+
+<!--
+		<a data-ng-repeat="exchange in exchanges">
+			<p class="list-group-item-text" data-ng-bind="exchange.created"></p>
+		</a>
+	-->
+	<div class="listBody">
+	<h4>Completed Exchanges</h4>
+	<div stretchdown class="exchangesContainer">
+		<div>
+			<accordion close-others=true>
+				<accordion-group  ng-repeat="exchange in exchanges">
+
+					<accordion-heading>
+						<div class='accHeader'>
+							<span class="glyphicon glyphicon-star"></span>
+						{{exchange.created | date:'medium'}}
+						<div ng-if=true class='reptNotice'>
+							<span class="glyphicon glyphicon-exclamation-sign"></span>
+						</div>
+						</div>
+					</accordion-heading>
+
+					<div class="audioPlayer">
+						<div class="playerIcons">
+							<span class="glyphicon glyphicon-play"></span>
+							<span class="glyphicon glyphicon-pause"></span>
+							<span class="glyphicon glyphicon-stop"></span>
+						</div>
+					</div>
+
+					<div class="panel panel-default" ng-repeat="dt in exchange.doneTasks">
+						<div class="panel-body taskPanel">
+
+						<table>
+							<col width="100">
+							<tr>
+							<td class="taskDisplay">
+							<div class="taskImg">
+								<img ng-src="{{taskpath}}/{{dt.task.ind}}/thumb.jpg" height="100" width="100">
+							</div>
+							</td>
+
+							<td>
+								<div class="taskInfo">
+									<div>Task carried out in {{dt.language|langs}}</div>
+									<div>Partner: {{authentication.user.displayName == dt.learner.displayName
+								| iif: dt.nativeSpeaker.displayName : dt.learner.displayName}}</div>
+								<div>Duration: {{dt.duration| dur}}</div>
+								<div>Your answer was:</div>
+								<div class="answerArea">{{dt.answer}}</div>
+							</div>
+						</td>
+							</tr>
+						</table>
+
+					</div>
+				</div>
+
+				<accordion class="reportArea" close-others="false">
+				<accordion-group>
+					<accordion-heading>
+						Report
+					</accordion-heading>
+					A report.
+				</accordion-group>
+			</accordion>
+
+
+				</accordion-group>
+			</accordion>
+		</div>
+	</div>
+</div>
+</div>
+
+</section>

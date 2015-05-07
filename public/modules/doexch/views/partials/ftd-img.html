@@ -1,0 +1,90 @@
+<style>
+  div#v-streams {display: inline-block}
+  img.puzzle_img {float:left; width: 400px}
+  div.twentyTwentyContainer{float:left; width: 400px}
+  div.vstream {width: 150px; height: 100px; border: 2px solid}
+</style>
+
+  <div ng-hide="$root.streamStarted" class="panel panel-default" ng-cloak>
+    You need to permit Convercise to access your camera and mic.
+  </div>
+
+
+  <div ng-show="$root.streamStarted" class="panel panel-default" ng-cloak>
+    <div class="panel-heading">
+      <h2 class="panel-title">Do this puzzle in {{doneTasks[ct_task].langfull}}</h2>
+      </div>
+
+    <div class="panel-body">
+
+      <div class="top-part">
+
+        <!-- State dependent -->
+        <div ng-if="doneTasks[ct_task].state == 1" class="img_div">
+          <img class="puzzle_img" src="{{taskpath}}/{{doneTasks[ct_task].ind}}/{{doneTasks[ct_task].img}}">
+        </div>
+
+
+        <div class="twentyTwentyContainer" data-ng-show="doneTasks[ct_task].state > 1">
+        <div twenty-twenty="true" id="compareImgs" ng-if="doneTasks[ct_task].state > 1" class="img_div">
+          <img class="puzzle_img" src="{{taskpath}}/{{doneTasks[ct_task].ind}}/{{doneTasks[ct_task].task.img1}}">
+          <img class="puzzle_img" src="{{taskpath}}/{{doneTasks[ct_task].ind}}/{{doneTasks[ct_task].task.img2}}">
+        </div>
+        </div>
+
+        <video-chat killpeer="killPeer"></video-chat>
+
+      </div>
+
+      <div ng-if="doneTasks[ct_task].state == 1" class="instructions">
+        Talk to your partner to find the difference between the pictures you see.
+      </div>
+      <div ng-if="doneTasks[ct_task].state == 2" class="instructions">
+        Was your answer correct?
+      </div>
+      <div ng-if="doneTasks[ct_task].state == 3" class="instructions">
+        Enter the correct answer.
+      </div>
+
+      <div class="bottom-part">
+        <div class="bottom-div">
+
+        <div class="answerText" id="text">
+          <textarea ng-if="doneTasks[ct_task].state == 1 || doneTasks[ct_task].state == 3" data-ng-hide="doneTasks[ct_task].native" id="textinput"
+          class="answerTextInput" data-ng-model="doneTasks[ct_task].answer"
+          placeholder="Enter Your Answer Here"></textarea>
+          <span ng-if="doneTasks[ct_task].state == 2" data-ng-hide="doneTasks[ct_task].native">{{doneTasks[ct_task].answer}}</span>
+          <span data-ng-show="doneTasks[ct_task].native">{{doneTasks[ct_task].answer}}</span>
+        </div>
+
+
+        <a ng-if="doneTasks[ct_task].state == 1" data-ng-show="doneTasks[ct_task].native"
+        class="accceptAnswBtn btn btn-primary btn-lg" ng-click="acceptAnswer()"
+        target="_blank" ng-disabled="doneTasks[ct_task].answer.length < 4">
+          Accept your partner's answer
+          </a>
+          <div ng-if="doneTasks[ct_task].state == 1" data-ng-hide="doneTasks[ct_task].native" class="learnerInst">
+            With your partner's help, compose an answer and write it in the field to the left.
+          </div>
+          <div ng-if="doneTasks[ct_task].state == 2" class="accceptAnswBtnsDiv">
+            <a class="yesOrNoBtn btn btn-primary btn-lg" ng-click="rightAnswer()" target="_blank">
+              Yes
+            </a>
+            <a class="yesOrNoBtn btn btn-warning btn-lg" ng-click="wrongAnswer()" target="_blank">
+              No
+            </a>
+          </div>
+          <a ng-if="doneTasks[ct_task].state == 3" data-ng-show="doneTasks[ct_task].native" class="accceptAnswBtn btn btn-primary btn-lg" ng-click="acceptFinalAnswer()" target="_blank">
+            Accept the final answer
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <!-- End state dependent -->
+
+
+  </div>
+</div>
