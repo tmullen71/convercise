@@ -136,7 +136,9 @@ module.exports = function(io, socket, server) {
   });
 
   socket.on('audioData', function(data) {
-    var fileName = uuid.v4() + '.wav';
+    console.log('# AUDIO DATA #');
+    var fileExt = (data.type === 'audio/ogg') ? '.ogg' : 'wav';
+    var fileName = uuid.v4() + fileExt;
     var dataURL = data.dataURL;
     var fileExtension = fileName.split('.').pop(),
         fileRootNameWithBase = './public/uploads/' + fileName,
@@ -149,7 +151,7 @@ module.exports = function(io, socket, server) {
       if (err) throw err;
 
       console.log('Saved file ' + fileName + '. FilePath: ' + filePath);
-      socket.emit('recordingSaved', '/uploads/' + filename);
+      socket.emit('recordingSaved', '/uploads/' + fileName);
     });
   });
 };

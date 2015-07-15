@@ -789,7 +789,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       };
 
       var updateDoneTask = function(iCopy){
-        $http.put('http://cv-audio-rec1.herokuapp.com/doneTasks/'+this_exch.doneTaskIds[iCopy], exch_data.doneTasks[iCopy])
+        $http.put('http://130.255.188.231:22810/doneTasks/'+this_exch.doneTaskIds[iCopy], exch_data.doneTasks[iCopy])
         .success(function(data){
           console.log('Updated doneTask:' + data);
         });
@@ -810,7 +810,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
         };
       }
 
-      $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
+      $http.put('http://130.255.188.231:22810/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
           console.log('Updated Exchange');
           console.log(data);
@@ -833,7 +833,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       }
 
       console.log(exchUpdate);
-      $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
+      $http.put('http://130.255.188.231:22810/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
           console.log('Updated Exchange');
           console.log(data);
@@ -1248,6 +1248,7 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
           peer.disconnect();
           if (recordAudio) {
             recordAudio.stopRecording(function() {
+              window.audoRec = recordAudio;
               recordAudio.getDataURL(function(audioDataURL) {
                 var audio = {
                   type: recordAudio.getBlob().type || 'audio/wav',
@@ -1314,7 +1315,7 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
             if (localStreamReady) {
               ThisExch.taskTimes[0].begin = $moment().format();
 
-              recordAudio = RecordRTC(window.localStream);
+              recordAudio = RecordRTC(window.localStream, { type: 'audio' });
 
               recordAudio.startRecording();
             }

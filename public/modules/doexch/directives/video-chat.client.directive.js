@@ -72,6 +72,7 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
           peer.disconnect();
           if (recordAudio) {
             recordAudio.stopRecording(function() {
+              window.audoRec = recordAudio;
               recordAudio.getDataURL(function(audioDataURL) {
                 var audio = {
                   type: recordAudio.getBlob().type || 'audio/wav',
@@ -138,7 +139,7 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
             if (localStreamReady) {
               ThisExch.taskTimes[0].begin = $moment().format();
 
-              recordAudio = RecordRTC(window.localStream);
+              recordAudio = RecordRTC(window.localStream, { type: 'audio' });
 
               recordAudio.startRecording();
             }

@@ -161,8 +161,9 @@ slider span.bubble.limit {
         <textarea class="debriefTextArea form-control" rows="10" id="comment" resize="none"></textarea>
       </div>
     </div>
-    <a class="btn btn-primary btn-lg" ng-click="submitDebrief()" target="_blank" >
-      Submit
+    <a class="btn btn-primary btn-lg" ng-click="submitDebrief()" ng-disabled="!streamSaved" target="_blank" >
+      <span ng-hide="streamSaved">Waiting for audio upload ...</span>
+      <span ng-show="streamSaved">Submit</span>
     </a>
   </div>
 <div>
