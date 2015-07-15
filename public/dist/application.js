@@ -789,7 +789,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       };
 
       var updateDoneTask = function(iCopy){
-        $http.put('http://130.255.188.231:22810/doneTasks/'+this_exch.doneTaskIds[iCopy], exch_data.doneTasks[iCopy])
+        $http.put('http://cv-audio-rec1.herokuapp.com/doneTasks/'+this_exch.doneTaskIds[iCopy], exch_data.doneTasks[iCopy])
         .success(function(data){
           console.log('Updated doneTask:' + data);
         });
@@ -810,7 +810,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
         };
       }
 
-      $http.put('http://130.255.188.231:22810/exchanges/'+this_exch.id, exchUpdate)
+      $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
           console.log('Updated Exchange');
           console.log(data);
@@ -833,7 +833,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       }
 
       console.log(exchUpdate);
-      $http.put('http://130.255.188.231:22810/exchanges/'+this_exch.id, exchUpdate)
+      $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
           console.log('Updated Exchange');
           console.log(data);
