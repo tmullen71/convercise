@@ -342,6 +342,42 @@ angular.module('core')
 
 'use strict';
 
+angular.module('core')
+  .directive('syncPlayer', ["$window", "$timeout", function ($window, $timeout) {
+    var link = function(scope, element, attrs) {
+      scope.audioSources = element.find('audio');
+      scope.playing = false;
+
+      scope.play = function() {
+        scope.playing = true;
+        angular.forEach(scope.audioSources, function(audio) {
+          audio.play();
+        });
+      };
+
+      scope.pause = function() {
+        scope.playing = false;
+        angular.forEach(scope.audioSources, function(audio) {
+          audio.pause();
+        });
+      };
+
+      scope.stop = function() {
+        scope.playing = false;
+        angular.forEach(scope.audioSources, function(audio) {
+          audio.currentTime = 0;
+          audio.pause();
+        });
+      };
+    };
+
+    return {
+      link: link
+    }
+  }]);
+
+'use strict';
+
 angular.module('core').filter('dur', [
 	function() {
 		return function(input) {
@@ -753,7 +789,7 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       };
 
       var updateDoneTask = function(iCopy){
-        $http.put('http://localhost:3000/doneTasks/'+this_exch.doneTaskIds[iCopy], exch_data.doneTasks[iCopy])
+        $http.put('http://cv-audio-rec1.herokuapp.com/doneTasks/'+this_exch.doneTaskIds[iCopy], exch_data.doneTasks[iCopy])
         .success(function(data){
           console.log('Updated doneTask:' + data);
         });
@@ -764,17 +800,45 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       }
 
       var exchUpdate;
-      if(this_exch.role === 'inviter'){
-        exchUpdate = {'state':'completed'};
-      }else if(this_exch.role === 'invitee'){
-        exchUpdate = {'invitee': Authentication.user._id};
+      if (this_exch.role === 'inviter'){
+        exchUpdate = {
+          state: 'completed'
+        };
+      } else if (this_exch.role === 'invitee'){
+        exchUpdate = {
+          invitee: Authentication.user._id
+        };
       }
 
-      $http.put('http://localhost:3000/exchanges/'+this_exch.id, exchUpdate)
+      $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
-          console.log('Updated Exchange:' + data);
+          console.log('Updated Exchange');
+          console.log(data);
         });
     },
+    submitRecording: function(recording) {
+      var exchUpdate;
+      if (this_exch.role === 'inviter'){
+        exchUpdate = {
+          recordings: {
+            inviter: recording
+          }
+        };
+      } else if (this_exch.role === 'invitee'){
+        exchUpdate = {
+          recordings: {
+            invitee: recording
+          }
+        };
+      }
+
+      console.log(exchUpdate);
+      $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
+        .success(function(data){
+          console.log('Updated Exchange');
+          console.log(data);
+        });
+    }
   };
 
   return this_exch;
@@ -811,6 +875,8 @@ angular.module('doexch').controller('DoExchController',[
 
     $rootScope.streamStarted = false;
     $scope.streamStarted = $rootScope.streamStarted;
+    $scope.streamSaved = false;
+    $scope.recording = '';
 
 
     //$scope.config = {};
@@ -960,7 +1026,7 @@ angular.module('doexch').controller('DoExchController',[
       }
     };
 
-    var debrief =  function(){
+    var debrief = function() {
       $scope.killPeer = true;
       ThisExch.submitExchange($scope.doneTasks);
       $scope.doneTasks[$scope.ct_task].state = 5;
@@ -968,8 +1034,6 @@ angular.module('doexch').controller('DoExchController',[
     };
 
     if(!DoExchSocketSetup.setupDone){
-
-
       Socket.on('/#setWaitModal', function(){
         var waitModalDefaults = {
           backdrop: false,
@@ -1060,6 +1124,13 @@ angular.module('doexch').controller('DoExchController',[
         debrief();
       });
 
+      Socket.on('recordingSaved', function(filePath) {
+        $scope.streamSaved = true;
+        $scope.recording = filePath;
+        console.log(filePath);
+        ThisExch.submitRecording(filePath);
+      });
+
       DoExchSocketSetup.setupDone = true;
   }
 
@@ -1067,7 +1138,7 @@ angular.module('doexch').controller('DoExchController',[
     if (ThisExch.ready){
       Socket.emit('setReadyOrGo', ThisExch.id);
       //ThisExch.ready gets set to false in the videoChat directive
-    }else{
+    } else {
       $location.url('/');
       $window.location.href = '/';
     }
@@ -1109,130 +1180,158 @@ function() {
 /*global Peer:false */
 'use strict';
 
-angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootScope','$moment',
-function($window, ThisExch, $rootScope, $moment){
-  return {
-    restrict: 'E',
-    template:'<div><div class="video-container">'+
-    '<video class="vid-chat" id="their-video" autoplay></video>'+
-    '<video class="vid-chat" id="my-video" muted="true" autoplay></video>'+
-    '</div></div>',
-    link: function(scope, element, attributes){
-      if(!ThisExch.ready){
-        return null;
-      }else{
-        ThisExch.ready = false;
-      }
-
-      var remoteStreamReady = false;
-      var localStreamReady = false;
-
-      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
-      scope.$watch(attributes.killpeer, function(newValue) {
-        if(newValue === true){
-          endCall();
-        }
-      });
-
-      // PeerJS object
-      var peer = new Peer(ThisExch.querystring, { key: 'wfoc88235mnp14i', debug: 3, config: {'iceServers': [
-    { url: 'stun:stun.l.google.com:19302' } // Pass in optional STUN and TURN server for maximum network compatibility
-    ]}});
-
-
-    peer.on('call', function(call){
-      // Answer the call automatically (instead of prompting user) for demo purposes
-      //alert('Time to answer');
-      //console.log(window.localStream);
-      if(window.localStream){
-        call.answer(window.localStream);
-      }
-      step3(call);
-    });
-
-    peer.on('error', function(err){
-      alert(err.message);
-      // Return to step 2 if error occurs
-      //step2();
-    });
-
-    // Click handlers setup
-    var makeCall = function(stream){
-      // Initiate a call!
-      var call = peer.call(ThisExch.ptnrquery, stream);
-      step3(call);
-    };
-
-    var endCall = function(){
-      window.localStream.stop();
-      peer.disconnect();
-      //window.existingCall.close();
-      //step2();
-    };
-
-    // Retry if getUserMedia fails
-    var step1Retry = function(){
-      $('#step1-error').hide();
-      step1();
-    };
-
-    function step1 () {
-      // Get audio/video stream
-      navigator.getUserMedia({audio: true, video: true}, function(stream){
-        // Set your video displays
-        localStreamReady = true;
-        if(remoteStreamReady){
-          ThisExch.taskTimes[0].begin = $moment().format();
+angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootScope', '$moment', 'Socket',
+  function($window, ThisExch, $rootScope, $moment, Socket) {
+    return {
+      restrict: 'E',
+      template: '<div><div class="video-container">' +
+        '<video class="vid-chat" id="their-video" autoplay></video>' +
+        '<video class="vid-chat" id="my-video" muted="true" autoplay></video>' +
+        '</div></div>',
+      link: function(scope, element, attributes) {
+        if (!ThisExch.ready) {
+          return null;
+        } else {
+          ThisExch.ready = false;
         }
 
-        scope.$apply(function(){
-          scope.$root.streamStarted = true;
+        var recordAudio;
+        var remoteStreamReady = false;
+        var localStreamReady = false;
 
-          $('#my-video').prop('src', URL.createObjectURL(stream));
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-          window.localStream = stream;
-
-          if(ThisExch.makeCall){
-            //alert('making call');
-            makeCall(stream);
-          }
-
-          if(window.existingCall){
-            window.existingCall.answer(stream);
+        scope.$watch(attributes.killpeer, function(newValue) {
+          if (newValue === true) {
+            endCall();
           }
         });
 
-      }, function(){ $('#step1-error').show(); });
-    }
+        // PeerJS object
+        var peer = new Peer(ThisExch.querystring, {
+          key: 'wfoc88235mnp14i',
+          debug: 3,
+          config: {
+            'iceServers': [{
+                url: 'stun:stun.l.google.com:19302'
+              } // Pass in optional STUN and TURN server for maximum network compatibility
+            ]
+          }
+        });
 
-    function step3 (call) {
-      // Hang up on an existing call if present
-      if (window.existingCall) {
-        window.existingCall.close();
-      }
 
-      // Wait for stream on the call, then set peer video display
-      call.on('stream', function(stream){
-        remoteStreamReady = true;
-        if(localStreamReady){
-          ThisExch.taskTimes[0].begin = $moment().format();
+        peer.on('call', function(call) {
+          // Answer the call automatically (instead of prompting user) for demo purposes
+          //alert('Time to answer');
+          //console.log(window.localStream);
+          if (window.localStream) {
+            call.answer(window.localStream);
+          }
+          step3(call);
+        });
+
+        peer.on('error', function(err) {
+          alert(err.message);
+          // Return to step 2 if error occurs
+          //step2();
+        });
+
+        // Click handlers setup
+        var makeCall = function(stream) {
+          // Initiate a call!
+          var call = peer.call(ThisExch.ptnrquery, stream);
+          step3(call);
+        };
+
+        var endCall = function() {
+          window.localStream.stop();
+          peer.disconnect();
+          if (recordAudio) {
+            recordAudio.stopRecording(function() {
+              recordAudio.getDataURL(function(audioDataURL) {
+                var audio = {
+                  type: recordAudio.getBlob().type || 'audio/wav',
+                  dataURL: audioDataURL
+                };
+                
+                Socket.emit('audioData', audio);
+              });
+            });
+          }
+          //window.existingCall.close();
+          //step2();
+        };
+
+        // Retry if getUserMedia fails
+        var step1Retry = function() {
+          $('#step1-error').hide();
+          step1();
+        };
+
+        function step1() {
+          // Get audio/video stream
+          navigator.getUserMedia({
+            audio: true,
+            video: true
+          }, function(stream) {
+            // Set your video displays
+            localStreamReady = true;
+            if (remoteStreamReady) {
+              ThisExch.taskTimes[0].begin = $moment().format();
+            }
+
+            scope.$apply(function() {
+              scope.$root.streamStarted = true;
+
+              $('#my-video').prop('src', URL.createObjectURL(stream));
+
+              window.localStream = stream;
+
+              if (ThisExch.makeCall) {
+                //alert('making call');
+                makeCall(stream);
+              }
+
+              if (window.existingCall) {
+                window.existingCall.answer(stream);
+              }
+            });
+
+          }, function() {
+            $('#step1-error').show();
+          });
         }
 
-        $('#their-video').prop('src', URL.createObjectURL(stream));
-      });
+        function step3(call) {
+          // Hang up on an existing call if present
+          if (window.existingCall) {
+            window.existingCall.close();
+          }
 
-      // UI stuff
-      window.existingCall = call;
-      //call.on('close', step2);
-    }
+          // Wait for stream on the call, then set peer video display
+          call.on('stream', function(stream) {
+            remoteStreamReady = true;
+            if (localStreamReady) {
+              ThisExch.taskTimes[0].begin = $moment().format();
 
-    step1();
+              recordAudio = RecordRTC(window.localStream);
 
+              recordAudio.startRecording();
+            }
+
+            $('#their-video').prop('src', URL.createObjectURL(stream));
+          });
+
+          // UI stuff
+          window.existingCall = call;
+          //call.on('close', step2);
+        }
+
+        step1();
+
+      }
+    };
   }
-};
-}
 ]);
 
 'use strict';

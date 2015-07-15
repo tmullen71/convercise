@@ -7,7 +7,7 @@ angular.module('mean').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('/assets/modules/core/views/home.client.view.html',
-    "<section data-ng-controller=\"HomeController\"><div class=\"jumbotron text-center\"><div data-ng-hide=\"authentication.user\" class=\"row\"><div class=\"col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-12\"><img alt=\"Convercise\" src=\"modules/core/img/brand/yinyang60.png\"></div></div><br><div data-ng-hide=\"authentication.user\" class=\"row\"><p class=\"lead\">Get started!</p></div><div id=\"topPageBtns\" data-ng-show=\"authentication.user\"><div class=\"row btnsRow\"><p class=\"topPageBtnsContainer\"><a class=\"top-btn btn btn-primary btn-lg\" ng-click=\"startExch()\" target=\"_blank\">Start exchange</a> <a class=\"top-btn btn btn-primary btn-lg\" href=\"#/schedule\" target=\"_blank\">Set schedule</a></p></div></div><div class=\"listBody\"><h4>Completed Exchanges</h4><div stretchdown class=\"exchangesContainer\"><div><accordion close-others=\"true\"><accordion-group ng-repeat=\"exchange in exchanges\"><accordion-heading><div class=\"accHeader\"><span class=\"glyphicon glyphicon-star\"></span> {{exchange.created | date:'medium'}}<div ng-if=\"true\" class=\"reptNotice\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span></div></div></accordion-heading><div class=\"audioPlayer\"><div class=\"playerIcons\"><span class=\"glyphicon glyphicon-play\"></span> <span class=\"glyphicon glyphicon-pause\"></span> <span class=\"glyphicon glyphicon-stop\"></span></div></div><div class=\"panel panel-default\" ng-repeat=\"dt in exchange.doneTasks\"><div class=\"panel-body taskPanel\"><table><col width=\"100\"><tr><td class=\"taskDisplay\"><div class=\"taskImg\"><img ng-src=\"{{taskpath}}/{{dt.task.ind}}/thumb.jpg\" height=\"100\" width=\"100\"></div></td><td><div class=\"taskInfo\"><div>Task carried out in {{dt.language|langs}}</div><div>Partner: {{authentication.user.displayName == dt.learner.displayName | iif: dt.nativeSpeaker.displayName : dt.learner.displayName}}</div><div>Duration: {{dt.duration| dur}}</div><div>Your answer was:</div><div class=\"answerArea\">{{dt.answer}}</div></div></td></tr></table></div></div><accordion class=\"reportArea\" close-others=\"false\"><accordion-group><accordion-heading>Report</accordion-heading>A report.</accordion-group></accordion></accordion-group></accordion></div></div></div></div></section>"
+    "<section data-ng-controller=\"HomeController\"><div class=\"jumbotron text-center\"><div data-ng-hide=\"authentication.user\" class=\"row\"><div class=\"col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-12\"><img alt=\"Convercise\" src=\"modules/core/img/brand/yinyang60.png\"></div></div><br><div data-ng-hide=\"authentication.user\" class=\"row\"><p class=\"lead\">Get started!</p></div><div id=\"topPageBtns\" data-ng-show=\"authentication.user\"><div class=\"row btnsRow\"><p class=\"topPageBtnsContainer\"><a class=\"top-btn btn btn-primary btn-lg\" ng-click=\"startExch()\" target=\"_blank\">Start exchange</a> <a class=\"top-btn btn btn-primary btn-lg\" href=\"#/schedule\" target=\"_blank\">Set schedule</a></p></div></div><div class=\"listBody\"><h4>Completed Exchanges</h4><div stretchdown class=\"exchangesContainer\"><div><accordion close-others=\"true\"><accordion-group ng-repeat=\"exchange in exchanges\"><accordion-heading><div class=\"accHeader\"><span class=\"glyphicon glyphicon-star\"></span> {{exchange.created | date:'medium'}}<div ng-if=\"true\" class=\"reptNotice\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span></div></div></accordion-heading><sync-player class=\"audioPlayer\"><div class=\"playerIcons\"><button class=\"glyphicon glyphicon-play\" ng-click=\"play()\" ng-class=\"{'active': !playing}\"></button> <button class=\"glyphicon glyphicon-pause\" ng-click=\"pause()\" ng-class=\"{'active': playing}\"></button> <button class=\"glyphicon glyphicon-stop\" ng-click=\"stop()\" ng-class=\"{'active': playing}\"></button></div><audio ng-src=\"{{exchange.recordings.invitee}}\"></audio><audio ng-src=\"{{exchange.recordings.inviter}}\"></audio></sync-player><div class=\"panel panel-default\" ng-repeat=\"dt in exchange.doneTasks\"><div class=\"panel-body taskPanel\"><table><col width=\"100\"><tr><td class=\"taskDisplay\"><div class=\"taskImg\"><img ng-src=\"{{taskpath}}/{{dt.task.ind}}/thumb.jpg\" height=\"100\" width=\"100\"></div></td><td><div class=\"taskInfo\"><div>Task carried out in {{dt.language|langs}}</div><div>Partner: {{authentication.user.displayName == dt.learner.displayName | iif: dt.nativeSpeaker.displayName : dt.learner.displayName}}</div><div>Duration: {{dt.duration| dur}}</div><div>Your answer was:</div><div class=\"answerArea\">{{dt.answer}}</div></div></td></tr></table></div></div><accordion class=\"reportArea\" close-others=\"false\"><accordion-group><accordion-heading>Report</accordion-heading>A report.</accordion-group></accordion></accordion-group></accordion></div></div></div></div></section>"
   );
 
 
@@ -27,109 +27,202 @@ angular.module('mean').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('/assets/modules/doexch/views/partials/debrief.html',
-    "<style>slider {\n" +
-    "  display: inline-block;\n" +
-    "  position: relative;\n" +
-    "  height: 7px;\n" +
-    "  width: 100%;\n" +
-    "  margin: 50px 5px 5px 5px;\n" +
-    "  vertical-align: middle;\n" +
-    "}\n" +
-    "slider span {\n" +
-    "  white-space: normal!important;\n" +
-    "  width: 200px;\n" +
-    "  text-align: center;\n" +
-    "  position: absolute;\n" +
-    "  display: inline-block;\n" +
-    "}\n" +
-    "slider span.base {\n" +
-    "  width: 100%;\n" +
-    "  height: 100%;\n" +
-    "  padding: 0;\n" +
-    "}\n" +
-    "slider span.bar {\n" +
-    "  width: 100%;\n" +
-    "  height: 100%;\n" +
-    "  z-index: 0;\n" +
-    "  -webkit-border-radius: 1em/1em;\n" +
-    "  border-radius: 1em/1em;\n" +
-    "  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #c0c0c0), color-stop(1, #8d8d8d));\n" +
-    "  background: -webkit-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\n" +
-    "  background: -moz-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\n" +
-    "  background: -o-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\n" +
-    "  background: -ms-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\n" +
-    "  background: linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\n" +
-    "  -webkit-box-shadow: inset 2px 2px 5px;\n" +
-    "  box-shadow: inset 2px 2px 5px;\n" +
-    "}\n" +
-    "slider span.bar.selection {\n" +
-    "  width: 0%;\n" +
-    "  z-index: 1;\n" +
-    "  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #13b6ff), color-stop(1, #00a8f3));\n" +
-    "  background: -webkit-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\n" +
-    "  background: -moz-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\n" +
-    "  background: -o-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\n" +
-    "  background: -ms-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\n" +
-    "  background: linear-gradient(top, #13b6ff 0, #00a8f3 100%);\n" +
-    "  -webkit-box-shadow: none;\n" +
-    "  box-shadow: none;\n" +
-    "}\n" +
-    "slider span.pointer {\n" +
-    "  cursor: pointer;\n" +
-    "  width: 30px;\n" +
-    "  height: 30px;\n" +
-    "  top: -12px;\n" +
-    "  background-color: #fff;\n" +
-    "  border: 1px solid #000;\n" +
-    "  z-index: 2;\n" +
-    "  -webkit-border-radius: 1em/1em;\n" +
-    "  border-radius: 1em/1em;\n" +
-    "}\n" +
-    "slider span.pointer:after {\n" +
-    "  content: '';\n" +
-    "  background-color: #808080;\n" +
-    "  width: 16px;\n" +
-    "  height: 16px;\n" +
-    "  position: absolute;\n" +
-    "  top: 6px;\n" +
-    "  left: 5.5px;\n" +
-    "  -webkit-border-radius: 1em/1em;\n" +
-    "  border-radius: 1em/1em;\n" +
-    "}\n" +
-    "slider span.pointer:hover:after {\n" +
-    "  background-color: #000;\n" +
-    "}\n" +
-    "slider span.pointer.active:after {\n" +
-    "  background-color: #f00;\n" +
-    "}\n" +
-    "slider span.bubble {\n" +
-    "  cursor: default;\n" +
-    "  top: -45px;\n" +
-    "  padding: 1px 3px 1px 3px;\n" +
-    "  font-size: 1em;\n" +
-    "  font-family: sans-serif;\n" +
-    "}\n" +
-    "slider span.bubble.selection {\n" +
-    "  top: 15px;\n" +
-    "}\n" +
-    "slider span.bubble.limit {\n" +
-    "  color: #808080;\n" +
+    "<style>slider {\r" +
+    "\n" +
+    "  display: inline-block;\r" +
+    "\n" +
+    "  position: relative;\r" +
+    "\n" +
+    "  height: 7px;\r" +
+    "\n" +
+    "  width: 100%;\r" +
+    "\n" +
+    "  margin: 50px 5px 5px 5px;\r" +
+    "\n" +
+    "  vertical-align: middle;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span {\r" +
+    "\n" +
+    "  white-space: normal!important;\r" +
+    "\n" +
+    "  width: 200px;\r" +
+    "\n" +
+    "  text-align: center;\r" +
+    "\n" +
+    "  position: absolute;\r" +
+    "\n" +
+    "  display: inline-block;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.base {\r" +
+    "\n" +
+    "  width: 100%;\r" +
+    "\n" +
+    "  height: 100%;\r" +
+    "\n" +
+    "  padding: 0;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.bar {\r" +
+    "\n" +
+    "  width: 100%;\r" +
+    "\n" +
+    "  height: 100%;\r" +
+    "\n" +
+    "  z-index: 0;\r" +
+    "\n" +
+    "  -webkit-border-radius: 1em/1em;\r" +
+    "\n" +
+    "  border-radius: 1em/1em;\r" +
+    "\n" +
+    "  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #c0c0c0), color-stop(1, #8d8d8d));\r" +
+    "\n" +
+    "  background: -webkit-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\r" +
+    "\n" +
+    "  background: -moz-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\r" +
+    "\n" +
+    "  background: -o-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\r" +
+    "\n" +
+    "  background: -ms-linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\r" +
+    "\n" +
+    "  background: linear-gradient(top, #c0c0c0 0, #8d8d8d 100%);\r" +
+    "\n" +
+    "  -webkit-box-shadow: inset 2px 2px 5px;\r" +
+    "\n" +
+    "  box-shadow: inset 2px 2px 5px;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.bar.selection {\r" +
+    "\n" +
+    "  width: 0%;\r" +
+    "\n" +
+    "  z-index: 1;\r" +
+    "\n" +
+    "  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #13b6ff), color-stop(1, #00a8f3));\r" +
+    "\n" +
+    "  background: -webkit-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\r" +
+    "\n" +
+    "  background: -moz-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\r" +
+    "\n" +
+    "  background: -o-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\r" +
+    "\n" +
+    "  background: -ms-linear-gradient(top, #13b6ff 0, #00a8f3 100%);\r" +
+    "\n" +
+    "  background: linear-gradient(top, #13b6ff 0, #00a8f3 100%);\r" +
+    "\n" +
+    "  -webkit-box-shadow: none;\r" +
+    "\n" +
+    "  box-shadow: none;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.pointer {\r" +
+    "\n" +
+    "  cursor: pointer;\r" +
+    "\n" +
+    "  width: 30px;\r" +
+    "\n" +
+    "  height: 30px;\r" +
+    "\n" +
+    "  top: -12px;\r" +
+    "\n" +
+    "  background-color: #fff;\r" +
+    "\n" +
+    "  border: 1px solid #000;\r" +
+    "\n" +
+    "  z-index: 2;\r" +
+    "\n" +
+    "  -webkit-border-radius: 1em/1em;\r" +
+    "\n" +
+    "  border-radius: 1em/1em;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.pointer:after {\r" +
+    "\n" +
+    "  content: '';\r" +
+    "\n" +
+    "  background-color: #808080;\r" +
+    "\n" +
+    "  width: 16px;\r" +
+    "\n" +
+    "  height: 16px;\r" +
+    "\n" +
+    "  position: absolute;\r" +
+    "\n" +
+    "  top: 6px;\r" +
+    "\n" +
+    "  left: 5.5px;\r" +
+    "\n" +
+    "  -webkit-border-radius: 1em/1em;\r" +
+    "\n" +
+    "  border-radius: 1em/1em;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.pointer:hover:after {\r" +
+    "\n" +
+    "  background-color: #000;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.pointer.active:after {\r" +
+    "\n" +
+    "  background-color: #f00;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.bubble {\r" +
+    "\n" +
+    "  cursor: default;\r" +
+    "\n" +
+    "  top: -45px;\r" +
+    "\n" +
+    "  padding: 1px 3px 1px 3px;\r" +
+    "\n" +
+    "  font-size: 1em;\r" +
+    "\n" +
+    "  font-family: sans-serif;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.bubble.selection {\r" +
+    "\n" +
+    "  top: 15px;\r" +
+    "\n" +
+    "}\r" +
+    "\n" +
+    "slider span.bubble.limit {\r" +
+    "\n" +
+    "  color: #808080;\r" +
+    "\n" +
     "}</style><div class=\"panel panel-default\" ng-cloak><div class=\"panel-heading\"><h3 class=\"panel-title\">Please answer these questions and click 'Submit' to complete the exchange</h3></div><div class=\"panel-body\"><div ng-show=\"reportRequired\" ng-class=\"{'reportUndonePanel': report.length < reportMinChars}\" class=\"panel panel-default debriefItemPanel\"><div class=\"panel-body\"><div class=\"reportLabel\"><label for=\"report\">Your class requires a report of at least {{reportMinChars}} characters:</label><button ng-show=\"report.length < reportMinChars\" type=\"button\" class=\"report-do-later-btn btn btn-danger btn-xs\" ng-click=\"reportRequired = false\">Do this later</button></div><textarea ng-model=\"report\" class=\"debriefTextArea form-control\" rows=\"10\" id=\"report\" resize=\"none\"></textarea></div></div><div class=\"panel panel-default debriefItemPanel\"><div class=\"panel-body\"><label for=\"ratePartnerSlider\">Please rate your partner's participation during this exchange.</label><div id=\"ratePartnerSlider\"><slider floor=\"{{ratePartnerSlider.floor}}\" ceiling=\"{{ratePartnerSlider.ceil}}\" step=\"{{ratePartnerSlider.step}}\" translate-fn=\"ratePartnerTrans\" ng-model=\"ratePartner\"></slider></div></div></div><div class=\"panel panel-default debriefItemPanel\"><div class=\"panel-body\"><label for=\"rateADiffSlider\">Please rate the difficulty of the first puzzle.</label><div id=\"rateADiffSlider\"><slider floor=\"{{rateADiffSlider.floor}}\" ceiling=\"{{rateADiffSlider.ceil}}\" step=\"{{rateADiffSlider.step}}\" translate-fn=\"rateDiffTrans\" ng-model=\"rateADiff\"></slider></div></div></div><div class=\"panel panel-default debriefItemPanel\"><div class=\"panel-body\"><label for=\"rateBDiffSlider\">Please rate the difficulty of the second puzzle.</label><div id=\"rateBDiffSlider\"><slider floor=\"{{rateBDiffSlider.floor}}\" ceiling=\"{{rateBDiffSlider.ceil}}\" step=\"{{rateBDiffSlider.step}}\" translate-fn=\"rateDiffTrans\" ng-model=\"rateBDiff\"></slider></div></div></div><div class=\"panel panel-default debriefItemPanel\"><div class=\"panel-body\"><label for=\"comment\">Any further thoughts or comments:</label><textarea class=\"debriefTextArea form-control\" rows=\"10\" id=\"comment\" resize=\"none\"></textarea></div></div><a class=\"btn btn-primary btn-lg\" ng-click=\"submitDebrief()\" target=\"_blank\">Submit</a></div><div></div></div>"
   );
 
 
   $templateCache.put('/assets/modules/doexch/views/partials/ftd-img.html',
-    "<style>div#v-streams {display: inline-block}\n" +
-    "  img.puzzle_img {float:left; width: 400px}\n" +
-    "  div.twentyTwentyContainer{float:left; width: 400px}\n" +
+    "<style>div#v-streams {display: inline-block}\r" +
+    "\n" +
+    "  img.puzzle_img {float:left; width: 400px}\r" +
+    "\n" +
+    "  div.twentyTwentyContainer{float:left; width: 400px}\r" +
+    "\n" +
     "  div.vstream {width: 150px; height: 100px; border: 2px solid}</style><div ng-hide=\"$root.streamStarted\" class=\"panel panel-default\" ng-cloak>You need to permit Convercise to access your camera and mic.</div><div ng-show=\"$root.streamStarted\" class=\"panel panel-default\" ng-cloak><div class=\"panel-heading\"><h2 class=\"panel-title\">Do this puzzle in {{doneTasks[ct_task].langfull}}</h2></div><div class=\"panel-body\"><div class=\"top-part\"><div ng-if=\"doneTasks[ct_task].state == 1\" class=\"img_div\"><img class=\"puzzle_img\" src=\"{{taskpath}}/{{doneTasks[ct_task].ind}}/{{doneTasks[ct_task].img}}\"></div><div class=\"twentyTwentyContainer\" data-ng-show=\"doneTasks[ct_task].state > 1\"><div twenty-twenty=\"true\" id=\"compareImgs\" ng-if=\"doneTasks[ct_task].state > 1\" class=\"img_div\"><img class=\"puzzle_img\" src=\"{{taskpath}}/{{doneTasks[ct_task].ind}}/{{doneTasks[ct_task].task.img1}}\"> <img class=\"puzzle_img\" src=\"{{taskpath}}/{{doneTasks[ct_task].ind}}/{{doneTasks[ct_task].task.img2}}\"></div></div><video-chat killpeer=\"killPeer\"></video-chat></div><div ng-if=\"doneTasks[ct_task].state == 1\" class=\"instructions\">Talk to your partner to find the difference between the pictures you see.</div><div ng-if=\"doneTasks[ct_task].state == 2\" class=\"instructions\">Was your answer correct?</div><div ng-if=\"doneTasks[ct_task].state == 3\" class=\"instructions\">Enter the correct answer.</div><div class=\"bottom-part\"><div class=\"bottom-div\"><div class=\"answerText\" id=\"text\"><textarea ng-if=\"doneTasks[ct_task].state == 1 || doneTasks[ct_task].state == 3\" data-ng-hide=\"doneTasks[ct_task].native\" id=\"textinput\" class=\"answerTextInput\" data-ng-model=\"doneTasks[ct_task].answer\" placeholder=\"Enter Your Answer Here\"></textarea><span ng-if=\"doneTasks[ct_task].state == 2\" data-ng-hide=\"doneTasks[ct_task].native\">{{doneTasks[ct_task].answer}}</span> <span data-ng-show=\"doneTasks[ct_task].native\">{{doneTasks[ct_task].answer}}</span></div><a ng-if=\"doneTasks[ct_task].state == 1\" data-ng-show=\"doneTasks[ct_task].native\" class=\"accceptAnswBtn btn btn-primary btn-lg\" ng-click=\"acceptAnswer()\" target=\"_blank\" ng-disabled=\"doneTasks[ct_task].answer.length < 4\">Accept your partner's answer</a><div ng-if=\"doneTasks[ct_task].state == 1\" data-ng-hide=\"doneTasks[ct_task].native\" class=\"learnerInst\">With your partner's help, compose an answer and write it in the field to the left.</div><div ng-if=\"doneTasks[ct_task].state == 2\" class=\"accceptAnswBtnsDiv\"><a class=\"yesOrNoBtn btn btn-primary btn-lg\" ng-click=\"rightAnswer()\" target=\"_blank\">Yes</a> <a class=\"yesOrNoBtn btn btn-warning btn-lg\" ng-click=\"wrongAnswer()\" target=\"_blank\">No</a></div><a ng-if=\"doneTasks[ct_task].state == 3\" data-ng-show=\"doneTasks[ct_task].native\" class=\"accceptAnswBtn btn btn-primary btn-lg\" ng-click=\"acceptFinalAnswer()\" target=\"_blank\">Accept the final answer</a></div></div></div></div>"
   );
 
 
   $templateCache.put('/assets/modules/doexch/views/partials/loc-inst.html',
-    "<style>div#v-streams {display: inline-block}\n" +
-    "img.puzzle_img {float:left; width: 400px}\n" +
-    "div.twentyTwentyContainer{float:left; width: 400px}\n" +
+    "<style>div#v-streams {display: inline-block}\r" +
+    "\n" +
+    "img.puzzle_img {float:left; width: 400px}\r" +
+    "\n" +
+    "div.twentyTwentyContainer{float:left; width: 400px}\r" +
+    "\n" +
     "div.vstream {width: 150px; height: 100px; border: 2px solid}</style><div class=\"panel panel-default\" ng-cloak><div class=\"panel-heading\"><h3 class=\"panel-title\">Do this puzzle in {{tasks[ct_task].langs}}</h3></div><div class=\"panel-body\"><ng-i f=\"tasks[ct_task].state == 1\">{{taskpath}}/{{tasks[ct_task].ind}}/{{tasks[ct_task].sktch}}<canvas loc-inst-processing=\"sketch\" ng-click=\"move($sketch)\"></canvas><div><div><div></div></div></div></ng-i></div></div>"
   );
 
