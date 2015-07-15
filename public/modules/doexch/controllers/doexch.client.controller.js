@@ -15,6 +15,8 @@ angular.module('doexch').controller('DoExchController',[
 
     $rootScope.streamStarted = false;
     $scope.streamStarted = $rootScope.streamStarted;
+    $scope.streamSaved = false;
+    $scope.recording = '';
 
 
     //$scope.config = {};
@@ -164,7 +166,7 @@ angular.module('doexch').controller('DoExchController',[
       }
     };
 
-    var debrief =  function(){
+    var debrief = function() {
       $scope.killPeer = true;
       ThisExch.submitExchange($scope.doneTasks);
       $scope.doneTasks[$scope.ct_task].state = 5;
@@ -172,8 +174,6 @@ angular.module('doexch').controller('DoExchController',[
     };
 
     if(!DoExchSocketSetup.setupDone){
-
-
       Socket.on('/#setWaitModal', function(){
         var waitModalDefaults = {
           backdrop: false,
@@ -264,6 +264,13 @@ angular.module('doexch').controller('DoExchController',[
         debrief();
       });
 
+      Socket.on('recordingSaved', function(filePath) {
+        $scope.streamSaved = true;
+        $scope.recording = filePath;
+        console.log(filePath);
+        ThisExch.submitRecording(filePath);
+      });
+
       DoExchSocketSetup.setupDone = true;
   }
 
@@ -271,7 +278,7 @@ angular.module('doexch').controller('DoExchController',[
     if (ThisExch.ready){
       Socket.emit('setReadyOrGo', ThisExch.id);
       //ThisExch.ready gets set to false in the videoChat directive
-    }else{
+    } else {
       $location.url('/');
       $window.location.href = '/';
     }

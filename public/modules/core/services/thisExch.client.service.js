@@ -79,17 +79,45 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
       }
 
       var exchUpdate;
-      if(this_exch.role === 'inviter'){
-        exchUpdate = {'state':'completed'};
-      }else if(this_exch.role === 'invitee'){
-        exchUpdate = {'invitee': Authentication.user._id};
+      if (this_exch.role === 'inviter'){
+        exchUpdate = {
+          state: 'completed'
+        };
+      } else if (this_exch.role === 'invitee'){
+        exchUpdate = {
+          invitee: Authentication.user._id
+        };
       }
 
       $http.put('http://localhost:3000/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
-          console.log('Updated Exchange:' + data);
+          console.log('Updated Exchange');
+          console.log(data);
         });
     },
+    submitRecording: function(recording) {
+      var exchUpdate;
+      if (this_exch.role === 'inviter'){
+        exchUpdate = {
+          recordings: {
+            inviter: recording
+          }
+        };
+      } else if (this_exch.role === 'invitee'){
+        exchUpdate = {
+          recordings: {
+            invitee: recording
+          }
+        };
+      }
+
+      console.log(exchUpdate);
+      $http.put('http://localhost:3000/exchanges/'+this_exch.id, exchUpdate)
+        .success(function(data){
+          console.log('Updated Exchange');
+          console.log(data);
+        });
+    }
   };
 
   return this_exch;

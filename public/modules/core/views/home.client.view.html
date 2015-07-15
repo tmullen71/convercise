@@ -41,14 +41,16 @@
 						</div>
 						</div>
 					</accordion-heading>
-
-					<div class="audioPlayer">
+					
+					<sync-player class="audioPlayer">
 						<div class="playerIcons">
-							<span class="glyphicon glyphicon-play"></span>
-							<span class="glyphicon glyphicon-pause"></span>
-							<span class="glyphicon glyphicon-stop"></span>
+							<button class="glyphicon glyphicon-play" ng-click="play()" ng-class="{'active': !playing}"></button>
+							<button class="glyphicon glyphicon-pause" ng-click="pause()" ng-class="{'active': playing}"></button>
+							<button class="glyphicon glyphicon-stop" ng-click="stop()" ng-class="{'active': playing}"></button>
 						</div>
-					</div>
+						<audio ng-src="{{exchange.recordings.invitee}}"></audio>
+						<audio ng-src="{{exchange.recordings.inviter}}"></audio>
+					</sync-player>
 
 					<div class="panel panel-default" ng-repeat="dt in exchange.doneTasks">
 						<div class="panel-body taskPanel">

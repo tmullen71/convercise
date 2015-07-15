@@ -15,6 +15,10 @@ var ExchangeSchema = new Schema({
 	first_socket: String,
 	inviter: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
 	invitee: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+	recordings: {
+		inviter: String,
+		invitee: String
+	},
 	created: {type: Date},
 	doneTasks: [{type: mongoose.Schema.Types.ObjectId, ref: 'DoneTask'},
 							{type: mongoose.Schema.Types.ObjectId, ref: 'DoneTask'}],

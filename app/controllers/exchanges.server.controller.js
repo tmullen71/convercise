@@ -36,6 +36,10 @@ exports.init = function(req, res){
 
 			var doneTaskIds = [dt0.id, dt1.id];
 			exchange.inviter = socket.request.user;
+			exchange.recordings = {
+				inviter: null,
+				invitee: null
+			};
 
 			dt0.save();
 			dt1.save();
@@ -207,7 +211,15 @@ exports.read = function(req, res) {
 exports.update = function(req, res) {
 	var exch = req.exchange ;
 
-	exch = _.extend(exch , req.body);
+	if (req.body && req.body.recordings) {
+		if (req.body.recordings.invitee) {
+			exch.recordings.invitee = req.body.recordings.invitee;
+		} else if (req.body.recordings.inviter) {
+			exch.recordings.inviter = req.body.recordings.inviter;
+		}
+	} else {
+		exch = _.extend(exch , req.body);
+	}
 
 	exch.save(function(err) {
 		if (err) {
