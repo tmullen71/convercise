@@ -111,7 +111,6 @@ angular.module('core').service('ThisExch', ['Authentication', '$http',
         };
       }
 
-      console.log(exchUpdate);
       $http.put('http://cv-audio-rec1.herokuapp.com/exchanges/'+this_exch.id, exchUpdate)
         .success(function(data){
           console.log('Updated Exchange');
