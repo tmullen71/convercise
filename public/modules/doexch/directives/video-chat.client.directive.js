@@ -19,9 +19,12 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
           ThisExch.ready = false;
         }
 
-        var recordAudio;
+        var recorderReady = false;
+        var lastChunk = false;
         var remoteStreamReady = false;
         var localStreamReady = false;
+
+        console.log(Socket);
 
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -70,19 +73,9 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
         var endCall = function() {
           window.localStream.stop();
           peer.disconnect();
-          if (recordAudio) {
-            recordAudio.stopRecording(function() {
-              window.audoRec = recordAudio;
-              recordAudio.getDataURL(function(audioDataURL) {
-                var audio = {
-                  type: recordAudio.getBlob().type || 'audio/wav',
-                  dataURL: audioDataURL
-                };
-                
-                Socket.emit('audioData', audio);
-              });
-            });
-          }
+          lastChunk = true;
+          recorderReady = false;
+          Socket.emit('audioEnd');
           //window.existingCall.close();
           //step2();
         };
@@ -127,6 +120,22 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
           });
         }
 
+        function convertFloat32ToInt16(buffer) {
+          var l = buffer.length;
+          var buf = new Int16Array(l);
+          while (l--) {
+            buf[l] = Math.min(1, buffer[l])*0x7FFF;
+          }
+          return buf.buffer;
+        } 
+
+        function recorderProcess(fileName, e) {
+          if (fileName !== null && recorderReady) {
+            var leftChannelData = e.inputBuffer.getChannelData(0);
+            Socket.emit('audioChunk', { fileName: fileName, last: lastChunk, chunk: convertFloat32ToInt16(leftChannelData) });
+          }
+        }
+
         function step3(call) {
           // Hang up on an existing call if present
           if (window.existingCall) {
@@ -139,9 +148,53 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
             if (localStreamReady) {
               ThisExch.taskTimes[0].begin = $moment().format();
 
-              recordAudio = RecordRTC(window.localStream, { type: 'audio' });
+              var mediaConstraints = {
+                audio: true
+              };
 
-              recordAudio.startRecording();
+              var fileName = null;
+              var audioContext = window.AudioContext;
+              var context = new audioContext();
+              var audioInput = context.createMediaStreamSource(localStream);
+              var bufferSize = 2048;
+              // create a javascript node
+              var recorder = context.createScriptProcessor(bufferSize, 1, 1);
+
+              Socket.once('audioReady', function(uuid) {
+                fileName = uuid;
+                recorderReady = true;
+                console.log(fileName, recorderReady);
+                // specify the processing function
+                recorder.onaudioprocess = recorderProcess.bind(this, fileName);
+                // connect stream to our recorder
+                audioInput.connect(recorder);
+                // connect our recorder to the previous destination
+                recorder.connect(context.destination);
+              });
+
+              Socket.emit('audioStart');
+
+              // navigator.getUserMedia({ audio: true }, 
+              //   function(stream) {
+              //     mediaRecorder = new MediaStreamRecorder(stream);
+              //     var fileName = null;
+
+              //     mediaRecorder.mimeType = 'audio/wav';
+              //     mediaRecorder.audioChannels = 1;
+
+              //     mediaRecorder.ondataavailable = function(blob) {
+              //       Socket.emit('audioChunk', { fileName: fileName, last: lastChunk, chunk: blob });
+              //     };
+
+              //     Socket.once('audioReady', function(uuid) {
+              //       fileName = uuid;
+              //       mediaRecorder.start(1000);
+              //     });
+
+              //     Socket.emit('audioStart');
+              //   }, function(e) {
+              //     console.error('media error', e);
+              //   });
             }
 
             $('#their-video').prop('src', URL.createObjectURL(stream));

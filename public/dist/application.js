@@ -1195,9 +1195,12 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
           ThisExch.ready = false;
         }
 
-        var recordAudio;
+        var mediaRecorder;
+        var lastChunk = false;
         var remoteStreamReady = false;
         var localStreamReady = false;
+
+        console.log(Socket);
 
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -1246,19 +1249,8 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
         var endCall = function() {
           window.localStream.stop();
           peer.disconnect();
-          if (recordAudio) {
-            recordAudio.stopRecording(function() {
-              window.audoRec = recordAudio;
-              recordAudio.getDataURL(function(audioDataURL) {
-                var audio = {
-                  type: recordAudio.getBlob().type || 'audio/wav',
-                  dataURL: audioDataURL
-                };
-                
-                Socket.emit('audioData', audio);
-              });
-            });
-          }
+          lastChunk = true;
+          mediaRecorder.stop();
           //window.existingCall.close();
           //step2();
         };
@@ -1315,9 +1307,31 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
             if (localStreamReady) {
               ThisExch.taskTimes[0].begin = $moment().format();
 
-              recordAudio = RecordRTC(window.localStream, { type: 'audio' });
+              var mediaConstraints = {
+                audio: true
+              };
 
-              recordAudio.startRecording();
+              navigator.getUserMedia({ audio: true }, 
+                function(stream) {
+                  mediaRecorder = new MediaStreamRecorder(stream);
+                  var fileName = null;
+
+                  mediaRecorder.mimeType = 'audio/ogg';
+                  mediaRecorder.audioChannels = 1;
+
+                  mediaRecorder.ondataavailable = function(blob) {
+                    Socket.emit('audioChunk', { uuid: fileName, last: lastChunk, chunk: blob });
+                  };
+
+                  Socket.once('audioReady', function(uuid) {
+                    fileName = uuid;
+                    mediaRecorder.start(1000);
+                  });
+
+                  Socket.emit('audioStart');
+                }, function(e) {
+                  console.error('media error', e);
+                });
             }
 
             $('#their-video').prop('src', URL.createObjectURL(stream));

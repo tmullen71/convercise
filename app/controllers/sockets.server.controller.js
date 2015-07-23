@@ -3,6 +3,7 @@
 var async = require('async');
 var uuid = require('uuid');
 var fs = require('fs');
+var wav = require('wav');
 
 var activeUsers = require('../../lib/active-users');
 var exchanges = require('../../app/controllers/exchanges.server.controller');
@@ -135,23 +136,50 @@ module.exports = function(io, socket, server) {
     socket.broadcast.to(partnersocket).emit('finishTask');
   });
 
-  socket.on('audioData', function(data) {
-    console.log('# AUDIO DATA #');
-    var fileExt = (data.type === 'audio/ogg') ? '.ogg' : 'wav';
-    var fileName = uuid.v4() + fileExt;
-    var dataURL = data.dataURL;
-    var fileExtension = fileName.split('.').pop(),
-        fileRootNameWithBase = './public/uploads/' + fileName,
-        filePath = fileRootNameWithBase,
-        fileBuffer;
+  var audioStream = null;
+  var fileName = null;
 
-    dataURL = dataURL.split(',').pop();
-    fileBuffer = new Buffer(dataURL, 'base64');
-    fs.writeFile(filePath, fileBuffer, function(err) {
-      if (err) throw err;
-
-      console.log('Saved file ' + fileName + '. FilePath: ' + filePath);
-      socket.emit('recordingSaved', '/uploads/' + fileName);
+  socket.on('audioStart', function() {
+    fileName = uuid.v4();
+    audioStream = new wav.FileWriter('./public/uploads/' + fileName + '.wav', {
+      channels: 1,
+      sampleRate: 44100,
+      bitDepth: 16
     });
+    socket.emit('audioReady', fileName);
+  });
+
+  socket.on('audioChunk', function(data) {
+    // console.log('# AUDIO DATA #');
+    var chunk = data.chunk;
+    
+    if (data.last) {
+      console.log('## Audio Ended ##');
+      if (audioStream && fileName) {
+        audioStream.end();
+        audioStream = null;
+        socket.emit('recordingSaved', '/uploads/' + fileName + '.wav');
+      }
+    } else {
+      console.log(chunk);
+      audioStream.write(chunk);
+    }
+  });
+
+  socket.on('audioEnd', function() {
+    if (audioStream && fileName) {
+      console.log('## Audio Ended ##');
+      audioStream.end();
+      audioStream = null;
+      socket.emit('recordingSaved', '/uploads/' + fileName + '.wav');
+    }
+  });
+
+  socket.on('disconnect', function() {
+    if (audioStream && fileName) {
+      audioStream.end();
+      audioStream = null;
+      socket.emit('recordingSaved', '/uploads/' + fileName + '.wav');
+    }
   });
 };

@@ -67,7 +67,6 @@ module.exports = {
 				'public/lib/twentytwenty/js/jquery.twentytwenty.js',
 				'public/lib/venturocket-angular-slider/build/angular-slider.js',
 				'public/lib/peerjs/peer.js',
-				'public/lib/recordrtc/RecordRTC.js',
 				'public/lib/moment/moment.js',
 				'public/lib/angular-momentjs/angular-momentjs.js'
 			]
