@@ -1298,7 +1298,7 @@ angular.module('doexch').directive('videoChat', ['$window', 'ThisExch', '$rootSc
             buf[l] = Math.min(1, buffer[l])*0x7FFF;
           }
           return buf.buffer;
-        } 
+        }
 
         function recorderProcess(fileName, e) {
           if (fileName !== null && recorderReady) {
@@ -1399,7 +1399,7 @@ angular.module('users').config(['$httpProvider',
 								$location.path('signin');
 								break;
 							case 403:
-								// Add unauthorized behaviour 
+								// Add unauthorized behaviour
 								break;
 						}
 
